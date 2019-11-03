@@ -20,10 +20,10 @@ class Matrix:
         self.height = height
         self.channels = channels
 
-        self.pixels = neopixel.NeoPixel(board.D18, width*height, bpp=channels, brightness=0.05, auto_write=False)
+        self.pixels = neopixel.NeoPixel(board.D18, width*height, bpp=channels, brightness=brightness, auto_write=False)
 
         buf = bytearray(width * height * channels)
-        self.fbuf = framebuf.FrameBuffer(buf, width, height)
+        self.fbuf = framebuf.FrameBuffer(buf, width, height, channels)
 
         self.apps = [
             Weather(),
@@ -67,7 +67,7 @@ class Matrix:
         self.pixels.show()
 
 
-matrix = Matrix(64, 8, 3, 0.01)
+matrix = Matrix(64, 8, 3, 0.05)
 
 
 def sigHandler(signum, frame):

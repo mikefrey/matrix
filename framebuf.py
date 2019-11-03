@@ -1,13 +1,14 @@
 class FrameBuffer:
 
-    def __init__(self, buf, width, height):
+    def __init__(self, buf, width, height, channels=3):
         self.buf = buf
         self.width = width
         self.height = height
-        self.stride = 3 * width
+        self.channels = channels
+        self.stride = channels * width
 
     def pixel(self, x, y, color=(0x000000)):
-        index = (y * self.stride) + (x * 3)
+        index = (y * self.stride) + (x * self.channels)
         if index+2 > len(self.buf):
             return
         
@@ -26,7 +27,7 @@ class FrameBuffer:
         self.buf[index + 2] = b
 
     def get(self, x, y):
-        i = (y * self.stride) + (x * 3)
+        i = (y * self.stride) + (x * self.channels)
         # if i + 2 > len(self.buf):
         #     return 0x000000
         return ((self.buf[i] << 16) | (self.buf[i+1] << 8) | self.buf[i+2])

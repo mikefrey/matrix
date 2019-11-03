@@ -14,6 +14,20 @@ key = ''
 lat = '45.1204118'
 lon = '-93.2150891'
 
+icons = {
+    "clear-day": Icon(Path('apps/weather/weather-clear-day.gif')),
+    "clear-night": Icon(Path('apps/weather/weather-clear-night.gif')),
+    "rain": Icon(Path('apps/weather/weather-rain.gif')),
+    "snow": Icon(Path('apps/weather/weather-snow.gif')),
+    "sleet": Icon(Path('apps/weather/weather-sleet.gif')),
+    "wind": Icon(Path('apps/weather/weather-wind.gif')),
+    "fog": Icon(Path('apps/weather/weather-fog.gif')),
+    "cloudy": Icon(Path('apps/weather/weather-cloudy.gif')),
+    "partly-cloudy-day": Icon(Path('apps/weather/weather-partly-cloudy-day.gif')),
+    "partly-cloudy-night": Icon(Path('apps/weather/weather-partly-cloudy-night.gif')),
+    "default": Icon(Path('apps/weather/weather-partly-cloudy-day.gif')),
+}
+
 class Weather:
     def __init__(self):
         # start the fetcher thread
@@ -21,13 +35,15 @@ class Weather:
         self.worker = threading.Thread(target=self.fetcher.start, daemon=True)
         self.worker.start()
 
-        # load the icon
-        # icon = Icon(Path('apps/weather/weather.png'))
-        # icon.read()
+        # load the icons
+        for _, icon in icons.items():
+            icon.read()
+
+        icon = icons["default"]
         
         items = {}
 
-        # items['image'] = drawable.Image(icon, 0, 0)
+        items['image'] = drawable.Image(icon, 0, 0)
         items['current'] = drawable.Text(Font5, '0°F', 10+19, 0, 0xffffff, 'right')
 
         self.items = items
@@ -36,6 +52,12 @@ class Weather:
         forecast = self.fetcher.read()
         if (not forecast):
             return
+
+        iconName = forecast.currently.icon
+        if not iconName in icons:
+            iconName = "default"
+
+        self.items['image'].img = icons[iconName]
         self.items['current'].msg = "{:3.0f}".format(forecast.currently.temperature) + "°F"
 
     def draw(self, fbuf):
