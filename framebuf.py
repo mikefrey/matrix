@@ -8,9 +8,11 @@ class FrameBuffer:
         self.stride = channels * width
 
     def pixel(self, x, y, color=(0x000000)):
-        index = (y * self.stride) + (x * self.channels)
-        if index+2 > len(self.buf):
+        if x < 0 or self.width <= x:
             return
+        if y < 0 or self.height <= y:
+            return
+        index = (y * self.stride) + (x * self.channels)
         
         t = type(color)
         if t is int:
@@ -62,7 +64,10 @@ class FrameBuffer:
             x -= l // 2
 
         for char in msg:
-            x = self.char(font[char], x, y, color)
+            w = len(font[char][0])
+            if x+w > 0 and x < self.width:
+                self.char(font[char], x, y, color)
+            x = x+w
         return x
     
     def img(self, img, x, y, w, h):

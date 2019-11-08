@@ -4,7 +4,7 @@ import http.client
 import time
 import threading
 
-from darksky.api import DarkSky
+from darksky.api import DarkSky, Forecast
 
 import drawable
 from font5 import Font5
@@ -40,15 +40,21 @@ class Weather:
             icon.read()
 
         icon = icons["default"]
+
+        currentX = Font5.measure("100°F") + 9
+        highX = Font5.measure(" 100°") + currentX
+        lowX = Font5.measure(" 00°") + highX
         
         items = {}
 
         items['image'] = drawable.Image(icon, 0, 0)
-        items['current'] = drawable.Text(Font5, '0°F', 10+19, 0, 0xffffff, 'right')
+        items['current'] = drawable.Text(Font5, '0°F', currentX, 0, 0xffffff, 'right')
+        items['high'] = drawable.Text(Font5, '0°', highX, 0, 0xff5555, 'right')
+        items['low'] = drawable.Text(Font5, '0°', lowX, 0, 0x5555ff, 'right')
 
         self.items = items
 
-    def update(self):
+    def update(self, now:int, elapsed:int):
         forecast = self.fetcher.read()
         if (not forecast):
             return
@@ -59,6 +65,9 @@ class Weather:
 
         self.items['image'].img = icons[iconName]
         self.items['current'].msg = "{:3.0f}".format(forecast.currently.temperature) + "°F"
+        # self.items['high'].msg = "{:3.0f}".format(forecast.daily.data[0].temperatureHigh) + "°"
+        self.items['high'].msg = f"{forecast.daily.data[0].temperature_high:.0f}°"
+        self.items['low'].msg = f"{forecast.daily.data[0].temperature_low:.0f}°"
 
     def draw(self, fbuf):
         for _, v in self.items.items():
@@ -66,20 +75,20 @@ class Weather:
 
 class WeatherFetcher:
     def __init__(self):
-        self.data = False
+        self.data:Forecast = None
         self._lock = threading.Lock()
         self.darksky = DarkSky(key)
 
     def start(self):
-        print("starting...")
+        print("starting weather fetcher...")
         while True:
             forecast = self.darksky.get_forecast(lat, lon)
-            print(forecast.currently.temperature)
+            print(f"{forecast.currently.temperature} {forecast.currently.icon}")
             self.update(forecast)
             time.sleep(5*60)
 
 
-    def update(self, data):
+    def update(self, data:Forecast):
         with self._lock:
             self.data = data
 

@@ -18,11 +18,11 @@ class Clock:
 
         self.items = items
 
-    def update(self):
+    def update(self, now:int, elapsed:int):
         now = datetime.now()
         self.items['time'].msg = now.strftime('%I:%M%p').lstrip('0')
         self.items['date'].msg = now.strftime('%d')
 
     def draw(self, fbuf):
-        for k, v in self.items.items():
+        for _, v in self.items.items():
             v.draw(fbuf)

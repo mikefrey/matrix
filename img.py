@@ -15,16 +15,15 @@ class Icon:
             self.width = frame.width
             self.height = frame.height
 
-            palette = frame.getpalette()
-
             i = 0
             while frame:
                 duration = 1000
                 if 'duration' in frame.info:
                     duration = frame.info['duration']
-                    print(f"{self.path} - frame {i} - {duration} {type(duration)}")
+                    #print(f"{self.path} - frame {i} - {duration}")
                 
                 data = list(frame.getdata())
+                palette = frame.getpalette()
                 if palette:
                     newdata = []
                     for d in data:

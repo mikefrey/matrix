@@ -8,9 +8,11 @@ import neopixel
 import font5
 import framebuf
 import img
+from timer import Timer
 
 from apps.clock.clock import Clock
 from apps.weather.weather import Weather
+from apps.news.news import News
 
 
 class Matrix:
@@ -26,25 +28,26 @@ class Matrix:
         self.fbuf = framebuf.FrameBuffer(buf, width, height, channels)
 
         self.apps = [
+            News(),
             Weather(),
             Clock()
         ]
 
+        self.timer = Timer(self.loop, 60)
+
     def start(self):
-        self.running = True
-        while self.running:
-            self.loop()
-            time.sleep(0.25)
+        self.timer.start()
 
     def stop(self):
+        self.timer.stop()
         self.pixels.fill(0x000000)
         self.pixels.show()
 
-    def update(self):
+    def update(self, now:int, elapsed:int):
         self.fbuf.clear()
 
         app = self.apps[0]
-        app.update()
+        app.update(now, elapsed)
 
     def draw(self):
         app = self.apps[0]
@@ -61,14 +64,14 @@ class Matrix:
             color = self.fbuf.get(x, y)
             self.pixels[i] = color
 
-    def loop(self):
-        self.update()
+    def loop(self, now, elapsed):
+        self.update(now, elapsed)
         self.draw()
         self.pixels.show()
 
 
-matrix = Matrix(64, 8, 3, 0.05)
-
+# matrix = Matrix(64, 8, 3, 0.05)
+matrix = Matrix(64, 8, 3, 0.5)
 
 def sigHandler(signum, frame):
     matrix.stop()
