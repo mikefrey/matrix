@@ -1,3 +1,5 @@
+from math import floor
+
 class FrameBuffer:
 
     def __init__(self, buf, width, height, channels=3):
@@ -6,6 +8,7 @@ class FrameBuffer:
         self.height = height
         self.channels = channels
         self.stride = channels * width
+        self.brightness = 1.0
 
     def pixel(self, x, y, color=(0x000000)):
         if x < 0 or self.width <= x:
@@ -30,9 +33,10 @@ class FrameBuffer:
 
     def get(self, x, y):
         i = (y * self.stride) + (x * self.channels)
-        # if i + 2 > len(self.buf):
-        #     return 0x000000
-        return ((self.buf[i] << 16) | (self.buf[i+1] << 8) | self.buf[i+2])
+        r = floor(self.buf[i] * self.brightness)
+        g = floor(self.buf[i+1] * self.brightness)
+        b = floor(self.buf[i+2] * self.brightness)
+        return ((r << 16) | (g << 8) | b)
 
     def clear(self):
         """Turns all the pixels to black"""
@@ -92,3 +96,47 @@ class FrameBuffer:
         """
         for i in range(l):
             self.pixel(x+i, y, color)
+
+class TranslatedFrameBuffer:
+    def __init__(self, fbuf, tx, ty):
+        self.fbuf = fbuf
+        self.tx = tx
+        self.ty = ty
+        
+    def pixel(self, x, y, color=(0x000000)):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.pixel(x, y, color)
+
+    def get(self, x, y):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.get(x, y)
+
+    def clear(self):
+        return self.fbuf.clear()
+    
+    def char(self, char, x, y, color=0xffffff):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.char(char, x, y, color)
+    
+    def text(self, font, msg, x, y, color=0xffffff, align='left'):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.text(font, msg, x, y, color, align)
+    
+    def img(self, img, x, y, w, h):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.img(img, x, y, w, h)
+
+    def vline(self, x, y, l, color=0xffffff):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.vline(x, y, l, color)
+
+    def hline(self, x, y, l, color=0xffffff):
+        x = round(self.tx + x)
+        y = round(self.ty + y)
+        return self.fbuf.hline(x, y, l, color)

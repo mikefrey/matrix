@@ -5,10 +5,9 @@ import sys
 import board
 import neopixel
 
-import font5
-import framebuf
-import img
-from timer import Timer
+from app import App
+from framebuf import FrameBuffer, TranslatedFrameBuffer
+from timer import Timer, Animator
 
 from apps.clock.clock import Clock
 from apps.weather.weather import Weather
@@ -24,13 +23,16 @@ class Matrix:
 
         self.pixels = neopixel.NeoPixel(board.D18, width*height, bpp=channels, brightness=brightness, auto_write=False)
 
-        buf = bytearray(width * height * channels)
-        self.fbuf = framebuf.FrameBuffer(buf, width, height, channels)
+        buf1 = bytearray(width * height * channels)
+        # buf2 = bytearray(width * height * channels)
+        self.fbuf = FrameBuffer(buf1, width, height, channels)
+        # self.bbuf = FrameBuffer(buf2, width, height, channels)
+        self.tbuf = TranslatedFrameBuffer(self.fbuf, 0, 0)
 
         self.apps = [
-            News(),
-            Weather(),
-            Clock()
+            App(News(), 0, 0),
+            App(Weather(), 0, 10),
+            App(Clock(), 0 , 20)
         ]
 
         self.timer = Timer(self.loop, 60)
@@ -46,12 +48,18 @@ class Matrix:
     def update(self, now:int, elapsed:int):
         self.fbuf.clear()
 
-        app = self.apps[0]
-        app.update(now, elapsed)
+        for app in self.apps:
+            app.update(now, elapsed)
+            app.y = app.y - elapsed/1e9 * 3
+            if round(app.y) < -7:
+                app.y = app.y + len(self.apps) * 10
 
     def draw(self):
-        app = self.apps[0]
-        app.draw(self.fbuf)
+        for app in self.apps:
+            if -7 < app.x and app.x < 8:
+                self.tbuf.tx = app.x
+                self.tbuf.ty = app.y
+                app.draw(self.tbuf)
 
         for i in range(self.width * self.height):
             x = i // self.height
@@ -71,7 +79,7 @@ class Matrix:
 
 
 # matrix = Matrix(64, 8, 3, 0.05)
-matrix = Matrix(64, 8, 3, 0.5)
+matrix = Matrix(64, 8, 3, 0.05)
 
 def sigHandler(signum, frame):
     matrix.stop()

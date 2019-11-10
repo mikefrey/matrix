@@ -27,16 +27,16 @@ class News:
         self.worker = threading.Thread(target=self.fetcher.start, daemon=True)
         self.worker.start()
 
-        self.lastUpdate = 0
+        self.lastUpdate = 0.0
 
         self.items = {}
 
     def fillSet(self, news, lastUpdate):
         x = 64
-        if self.lastUpdate in self.items.items():
+        if self.lastUpdate in self.items.keys():
             # measure width of prev set to get the x offset for the next set.
             prev = self.items[self.lastUpdate]
-            x = prev.width() + prev.x + 64
+            x = prev.x + prev.width() + 64
 
         newsSet = drawable.Set(x, 0)
         self.items[lastUpdate] = newsSet
@@ -59,24 +59,18 @@ class News:
             self.fillSet(news, lastUpdate)
             self.lastUpdate = lastUpdate
 
+        toDelete = None
         for k, v in self.items.items():
             if k != self.lastUpdate and v.x + v.width() < 0:
-                del self.items[k]
+                toDelete = k
             elif v.x + v.width() < 0:
                 v.x = 64
             else:
-                v.x = v.x - elapsed/1e9*10
+                v.x = v.x - elapsed/1e9*14
 
+        if toDelete:
+            del self.items[toDelete]
 
-
-        # item = self.items['1']
-        # if not title == item.msg:
-        #     item.msg = title
-        #     item.x = 10
-        # elif item.x + Font5.measure(item.msg) < 0:
-        #     item.x = 64
-        # else:
-        #     item.x = item.x - elapsed/1e9 * 10
         
     def draw(self, fbuf):
         for _, v in self.items.items():
@@ -105,7 +99,7 @@ class NewsFetcher:
             self.data = articles
             self.lastUpdate = time.time()
 
-    def read(self):
+    def read(self) -> (list, float):
         with self._lock:
             return self.data, self.lastUpdate
 
