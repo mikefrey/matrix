@@ -98,10 +98,10 @@ class FrameBuffer:
             self.pixel(x+i, y, color)
 
 class TranslatedFrameBuffer:
-    def __init__(self, fbuf, tx, ty):
-        self.fbuf = fbuf
-        self.tx = tx
-        self.ty = ty
+    def __init__(self):
+        self.fbuf:FrameBuffer = None
+        self.tx = 0
+        self.ty = 0
         
     def pixel(self, x, y, color=(0x000000)):
         x = round(self.tx + x)

@@ -12,8 +12,14 @@ class FontBase(UserDict):
     def measure(self, text):
         size = 0
         for c in text:
-            size += len(self.data[c][0])
+            size += len(self[c][0])
         return size
+
+    def __getitem__(self, key):
+        if key in self.data:
+            return self.data[key]
+        print(f'missing character "{key}"')
+        return self.data['?']
 
 Font5 = FontBase({
     ' ': [
@@ -696,6 +702,16 @@ Font5 = FontBase({
         [_, X, _, _],
         [_, _, _, _]
     ],
+    '£': [
+        [_, _, _, _],
+        [_, X, X, _],
+        [_, X, _, _],
+        [X, X, X, _],
+        [_, X, _, _],
+        [X, X, X, _],
+        [_, _, _, _],
+        [_, _, _, _]
+    ],
     '%': [
         [_, _, _, _, _],
         [_, _, _, _, _],
@@ -973,3 +989,5 @@ Font5["‘"] = Font5["'"]
 Font5['“'] = Font5['"']
 Font5['”'] = Font5['"']
 Font5["—"] = Font5["-"]
+
+Font5['á'] = Font5['a']

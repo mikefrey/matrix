@@ -1,34 +1,11 @@
-from pathlib import Path
-from datetime import datetime
-from math import floor
-import time
-import threading
-
-from newsapi import NewsApiClient
-
 import drawable
 from font5 import Font5
 from img import Icon
 
-key = ''
-sources = 'the-new-york-times,the-wall-street-journal,bbc-news,abc-news,al-jazeera-english'
-sourceMap = {
-    'the-new-york-times': 'NYT',
-    'the-wall-street-journal': 'WSJ',
-    'bbc-news': 'BBC',
-    'abc-news': 'ABC',
-    'al-jazeera-english': 'AJE',
-}
-
 class News:
-    def __init__(self):
-        # start the fetcher thread
-        self.fetcher = NewsFetcher()
-        self.worker = threading.Thread(target=self.fetcher.start, daemon=True)
-        self.worker.start()
-
+    def __init__(self, fetcher):
+        self.fetcher = fetcher
         self.lastUpdate = 0.0
-
         self.items = {}
 
     def fillSet(self, news, lastUpdate):
@@ -75,36 +52,3 @@ class News:
     def draw(self, fbuf):
         for _, v in self.items.items():
             v.draw(fbuf)
-
-class NewsFetcher:
-    def __init__(self):
-        self.data = None
-        self.lastUpdate = None
-        self._lock = threading.Lock()
-        self.newsapi = NewsApiClient(api_key=key)
-
-    def start(self):
-        print("starting news fetcher...")
-        while True:
-            news = self.newsapi.get_top_headlines(sources=sources, page_size=5)
-            self.update(news)
-            time.sleep(5*60)
-
-
-    def update(self, data):
-        articles = []
-        for article in data["articles"]:
-            articles.append(Article(article))
-        with self._lock:
-            self.data = articles
-            self.lastUpdate = time.time()
-
-    def read(self) -> (list, float):
-        with self._lock:
-            return self.data, self.lastUpdate
-
-class Article:
-    def __init__(self, article):
-        self.source = sourceMap[article["source"]["id"]]
-        self.title = article["title"]
-        self.publishedAt = article["publishedAt"]

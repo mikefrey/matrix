@@ -1,6 +1,4 @@
 from pathlib import Path
-from datetime import datetime
-import http.client
 import time
 import threading
 
@@ -9,10 +7,6 @@ from darksky.api import DarkSky, Forecast
 import drawable
 from font5 import Font5
 from img import Icon
-
-key = ''
-lat = '45.1204118'
-lon = '-93.2150891'
 
 icons = {
     "clear-day": Icon(Path('apps/weather/weather-clear-day.gif')),
@@ -29,11 +23,8 @@ icons = {
 }
 
 class Weather:
-    def __init__(self):
-        # start the fetcher thread
-        self.fetcher = WeatherFetcher()
-        self.worker = threading.Thread(target=self.fetcher.start, daemon=True)
-        self.worker.start()
+    def __init__(self, fetcher):
+        self.fetcher = fetcher
 
         # load the icons
         for _, icon in icons.items():
@@ -72,26 +63,3 @@ class Weather:
     def draw(self, fbuf):
         for _, v in self.items.items():
             v.draw(fbuf)
-
-class WeatherFetcher:
-    def __init__(self):
-        self.data:Forecast = None
-        self._lock = threading.Lock()
-        self.darksky = DarkSky(key)
-
-    def start(self):
-        print("starting weather fetcher...")
-        while True:
-            forecast = self.darksky.get_forecast(lat, lon)
-            print(f"{forecast.currently.temperature} {forecast.currently.icon}")
-            self.update(forecast)
-            time.sleep(5*60)
-
-
-    def update(self, data:Forecast):
-        with self._lock:
-            self.data = data
-
-    def read(self):
-        with self._lock:
-            return self.data
