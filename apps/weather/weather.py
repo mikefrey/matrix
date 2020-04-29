@@ -5,7 +5,7 @@ import threading
 from darksky.api import DarkSky, Forecast
 
 import drawable
-from font5 import Font5
+from fonts.font5 import Font5
 from img import Icon
 
 icons = {

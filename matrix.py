@@ -107,13 +107,17 @@ class Matrix:
         # print('loop')
         time.sleep(0.001)
 
-# matrix = Matrix(64, 8, 3, 0.05)
-matrix = Matrix(64, 8, 3, 0.05)
+def main():
+    # matrix = Matrix(64, 8, 3, 0.05)
+    matrix = Matrix(64, 8, 3, 0.05)
 
-def sigHandler(signum, frame):
-    matrix.stop()
-    sys.exit(0)
+    def sigHandler(signum, frame):
+        matrix.stop()
+        sys.exit(0)
 
-signal.signal(signal.SIGINT, sigHandler)
+    signal.signal(signal.SIGINT, sigHandler)
 
-matrix.start()
+    matrix.start()
+
+if __name__ == "__main__":
+    main()

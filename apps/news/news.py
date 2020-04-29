@@ -1,5 +1,5 @@
 import drawable
-from font5 import Font5
+from fonts.font5 import Font5
 from img import Icon
 
 class News:

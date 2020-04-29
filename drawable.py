@@ -1,6 +1,6 @@
 from time import time_ns
 from img import Icon
-from font5 import FontBase
+from fonts.font5 import FontBase
 
 class Set(dict):
     def __init__(self, x:float, y:float):

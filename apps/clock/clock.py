@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 import drawable
-from font5 import Font5
+from fonts.font5 import Font5
 from img import Icon
 
 class Clock:
